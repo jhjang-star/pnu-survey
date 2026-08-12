@@ -1,0 +1,74 @@
+# 부산대학교 AI 수학 학습 설문 시스템
+
+풀리캠퍼스 스타일의 사전/사후 설문 웹앱입니다. 학생 화면과 관리자 화면으로 구성되며,
+응답은 **Google Sheets(Apps Script 웹앱)** 에 저장됩니다.
+
+## 구성
+
+| 파일 | 설명 |
+|------|------|
+| `index.html` / `app.js` | 학생 설문 화면 (사전/사후) |
+| `admin.html` / `admin.js` | 관리자 대시보드 (집계·CSV 내보내기) |
+| `surveys.js` | 설문 문항 스키마 (사전 16문항, 사후 20문항) |
+| `styles.css` | 풀리캠퍼스 스타일 공용 CSS |
+| `config.js` | Apps Script 웹앱 URL 설정 |
+| `Code.gs` | Google Apps Script 백엔드 (저장/조회) |
+
+## 화면 흐름
+
+- **학생**: 풀리캠퍼스에서 학번을 URL로 전달해 접속
+  - 설문 선택: `index.html?sid=학번`
+  - 사전 바로가기: `index.html?sid=학번&type=pre`
+  - 사후 바로가기: `index.html?sid=학번&type=post`
+  - (선택) 이름도 함께: `...&name=홍길동`
+  - `sid` 파라미터 키는 `sid`, `student_id`, `studentId`, `hakbun` 모두 인식합니다.
+  - 학번이 없으면 설문 화면에서 직접 입력할 수 있습니다(테스트용).
+- **관리자**: `admin.html` 접속 → 웹앱 URL + 비밀번호로 로그인 → 사전/사후 집계 확인
+
+## 배포 (Google Sheets 연동)
+
+1. **Google 스프레드시트**를 새로 만들고 → 상단 메뉴 **확장 프로그램 › Apps Script**
+2. 기본 `Code.gs` 내용을 지우고 이 저장소의 **`Code.gs`** 전체를 붙여넣기
+3. 상단의 `ADMIN_PASSWORD` 값을 원하는 관리자 비밀번호로 변경 (기본값 `pnu2026`)
+4. **배포 › 새 배포 › 유형: 웹 앱**
+   - 실행 계정: **나**
+   - 액세스 권한: **모든 사용자**
+5. 배포 후 나오는 **웹앱 URL(`.../exec`)** 복사
+6. `config.js` 의 `GAS_URL` 에 그 URL을 붙여넣기 (학생 제출용)
+7. 관리자 화면 로그인 시에도 같은 URL + 3번의 비밀번호 입력
+
+> 저장은 `사전설문` / `사후설문` 시트에 자동으로 이루어지며, 시트/헤더는 자동 생성됩니다.
+> 동일 학번이 다시 제출하면 기존 행을 **최신 내용으로 덮어씁니다(upsert)**.
+
+## 호스팅
+
+정적 파일만으로 동작하므로 아무 정적 호스팅에 올리면 됩니다.
+- GitHub Pages, Netlify, Vercel, 학교 웹서버 등 어디든 가능
+- 로컬 확인: 이 폴더에서 간단한 정적 서버 실행 후 브라우저 접속
+
+```bash
+python -m http.server 5500
+```
+
+## 데모 모드 (백엔드 없이 먼저 확인)
+
+`config.js` 의 `GAS_URL` 이 비어 있으면 **데모 모드**로 동작합니다.
+- 학생 제출 → 브라우저 `localStorage` 에 임시 저장
+- 관리자 화면에서 URL 없이 로그인 → 같은 브라우저의 데모 저장분을 집계 표시
+- 화면/흐름/집계 UI를 배포 전에 미리 점검할 때 사용
+
+## CORS 참고
+
+Apps Script 웹앱은 CORS 응답 헤더를 제공하지 않으므로:
+- **학생 제출**: `fetch(..., { mode: 'no-cors' })` 로 전송(쓰기 전용, 응답 본문은 읽지 않음)
+- **관리자 조회**: **JSONP**(`callback` 파라미터)로 데이터 수신
+
+## 원본 설문(구글폼)
+
+- 사전: `1FAIpQLSfZSziCIDSEVs91usSC2K_aFGHmPXPOiRUneQ5tO2F1nGg2ig`
+- 사후: `1FAIpQLSfB5NZ22zJNvwK8nlhEzXBtazHU0Ld5j65UekqdjmRqPikkSA`
+
+## TODO / 확정 필요
+
+- 관리자 로그인 방식/비밀번호 최종 확정 (현재 임시: `pnu2026`)
+- 풀리캠퍼스 → 설문 링크 연동 방식 확정 (현재: URL `?sid=` 파라미터)
