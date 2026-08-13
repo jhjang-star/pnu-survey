@@ -5,46 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>부산대 설문 · 관리자</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=2">
 <style>
   .wrap{max-width:1040px;}
-  .login{max-width:420px;margin:60px auto 0;background:#fff;border:1px solid var(--line-normal);
-    border-radius:var(--radius-20);padding:32px 30px;box-shadow:var(--shadow-raised);}
-  .login h2{margin:0 0 6px;font-size:19px;font-weight:800;color:var(--text-strong);}
-  .login p{margin:0 0 20px;font-size:13.5px;color:var(--text-sub);}
+  .login{max-width:420px;margin:60px auto 0;background:var(--bg-card);border:1px solid var(--line-normal);
+    border-radius:var(--radius-20);padding:32px 30px;box-shadow:var(--shadow-modal);}
+  .login h2{margin:0 0 6px;font-size:20px;font-weight:700;color:var(--text-strong);}
+  .login p{margin:0 0 20px;font-size:13px;color:var(--text-sub);}
   .field{margin-bottom:14px;}
-  .field label{display:block;font-size:13px;font-weight:700;color:var(--text-normal);margin-bottom:6px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--text-normal);margin-bottom:6px;}
   .tabs{display:flex;gap:8px;margin:4px 0 20px;}
-  .tab{padding:10px 18px;border-radius:var(--radius-max);border:1px solid var(--line-normal);background:#fff;
-    font-size:14px;font-weight:700;color:var(--text-sub);}
-  .tab.active{background:var(--fill-primary);color:#fff;border-color:var(--fill-primary);}
+  .tab{padding:10px 18px;border-radius:var(--radius-max);border:1px solid var(--line-normal);background:var(--fill-inverse);
+    font-size:14px;font-weight:600;color:var(--text-sub);}
+  .tab.active{background:var(--fill-primary);color:var(--text-inverse);border-color:var(--fill-primary);}
   .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
-  .stat{background:#fff;border:1px solid var(--line-normal);border-radius:var(--radius-16);padding:18px 20px;box-shadow:var(--shadow-card);}
+  .stat{background:var(--bg-card);border:1px solid var(--line-normal);border-radius:var(--radius-16);padding:18px 20px;box-shadow:var(--shadow-card);}
   .stat .k{font-size:13px;color:var(--text-sub);font-weight:600;margin-bottom:6px;}
-  .stat .v{font-size:26px;font-weight:800;color:var(--text-strong);letter-spacing:-.5px;}
+  .stat .v{font-size:24px;font-weight:700;color:var(--text-strong);letter-spacing:-.5px;}
   .stat .v small{font-size:14px;color:var(--text-sub);font-weight:600;}
-  .panel{background:#fff;border:1px solid var(--line-normal);border-radius:var(--radius-16);
+  .panel{background:var(--bg-card);border:1px solid var(--line-normal);border-radius:var(--radius-16);
     box-shadow:var(--shadow-card);padding:20px 22px;margin-bottom:16px;}
-  .panel h3{margin:0 0 4px;font-size:15px;font-weight:800;color:var(--text-strong);}
-  .panel .qsub{font-size:12.5px;color:var(--text-sub);margin-bottom:14px;}
+  .panel h3{margin:0 0 4px;font-size:16px;font-weight:600;color:var(--text-strong);}
+  .panel .qsub{font-size:12px;color:var(--text-sub);margin-bottom:14px;}
   .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:9px;}
   .bar-row .name{width:130px;flex:none;font-size:13px;color:var(--text-normal);text-align:right;}
-  .bar-row .track{flex:1;height:20px;background:var(--grey-10);border-radius:var(--radius-max);overflow:hidden;}
-  .bar-row .fill{height:100%;border-radius:var(--radius-max);background:linear-gradient(90deg,#6d6dff,#8f7bff);transition:width .5s;}
-  .bar-row .cnt{width:78px;flex:none;font-size:12.5px;color:var(--text-sub);font-weight:600;}
+  .bar-row .track{flex:1;height:20px;background:var(--fill-hover);border-radius:var(--radius-max);overflow:hidden;}
+  .bar-row .fill{height:100%;border-radius:var(--radius-max);background:var(--grad-primary);transition:width .5s;}
+  .bar-row .cnt{width:78px;flex:none;font-size:12px;color:var(--text-sub);font-weight:600;}
   .avg-badge{display:inline-flex;align-items:baseline;gap:4px;background:var(--fill-primary-weak);color:var(--text-primary);
-    padding:3px 11px;border-radius:var(--radius-max);font-weight:800;font-size:14px;}
+    padding:3px 11px;border-radius:var(--radius-max);font-weight:700;font-size:14px;}
   .avg-badge small{font-size:11px;font-weight:600;}
-  .txt-list{max-height:220px;overflow:auto;border:1px solid var(--line-normal);border-radius:var(--radius-10);}
-  .txt-list .item{padding:9px 13px;border-bottom:1px solid var(--grey-10);font-size:13.5px;color:var(--text-normal);}
+  .txt-list{max-height:220px;overflow:auto;border:1px solid var(--line-normal);border-radius:var(--radius-10);background:var(--fill-inverse);}
+  .txt-list .item{padding:9px 13px;border-bottom:1px solid var(--grey-10);font-size:13px;color:var(--text-normal);}
   .txt-list .item:last-child{border-bottom:none;}
-  .txt-list .item .sid{color:var(--text-sub);font-size:11.5px;margin-right:8px;}
+  .txt-list .item .sid{color:var(--text-sub);font-size:11px;margin-right:8px;}
   .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar .spacer{flex:1;}
-  .table-scroll{overflow:auto;border:1px solid var(--line-normal);border-radius:var(--radius-12);background:#fff;}
-  table.raw{border-collapse:collapse;font-size:12.5px;white-space:nowrap;}
+  .table-scroll{overflow:auto;border:1px solid var(--line-normal);border-radius:var(--radius-12);background:var(--fill-inverse);}
+  table.raw{border-collapse:collapse;font-size:12px;white-space:nowrap;}
   table.raw th,table.raw td{border-bottom:1px solid var(--grey-10);padding:8px 11px;text-align:left;}
-  table.raw thead th{position:sticky;top:0;background:var(--grey-10);font-weight:700;color:var(--text-normal);z-index:2;}
+  table.raw thead th{position:sticky;top:0;background:var(--fill-hover);font-weight:600;color:var(--text-normal);z-index:2;}
   table.raw tbody tr:hover td{background:var(--fill-hover);}
   .search{max-width:220px;}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
