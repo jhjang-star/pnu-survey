@@ -22,7 +22,7 @@ window.CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbzS3oY1_6IQsYI7lM2yrMRPIWSOEh_bGfJhmJcyhStF-IvPq8k5xIlriQbVN1Me6VOHAw/exec',
 
   PERIODS: {
-    pre:  { start: '2026-09-01T09:00', end: '2026-09-07T23:59' },   // 사전: 9월 첫째주(1~7일)
+    pre:  { start: '', end: '2026-09-07T23:59' },                   // 사전: (테스트) 지금부터 ~ 9/7
     post: { start: '2026-12-01T09:00', end: '2026-12-07T23:59' },   // 사후: 12월 첫째주(1~7일)
   },
 };
