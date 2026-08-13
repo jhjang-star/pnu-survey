@@ -20,7 +20,34 @@
 // ★ 관리자 비밀번호 — 원하는 값으로 변경하세요.
 var ADMIN_PASSWORD = 'pnu2026';
 
+// ★ 설문 기간(서버측 강제) — config.js 의 PERIODS 와 동일하게 유지하세요.
+//   시각은 한국시간(KST) 기준. 비워두면('') 해당 방향 제한 없음.
+//   이 기간 밖에는 서버가 저장을 거부하여 응답이 완전히 비활성화됩니다.
+var PERIODS = {
+  pre:  { start: '2026-09-01T09:00', end: '2026-09-07T23:59' },
+  post: { start: '2026-12-01T09:00', end: '2026-12-07T23:59' },
+};
+
 var META_HEADERS = ['제출시각', '학번', '이름'];
+
+// KST 문자열('YYYY-MM-DDTHH:mm')을 Date(UTC epoch)로 변환
+function kstToDate(s) {
+  if (!s) return null;
+  var m = String(s).match(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/);
+  if (!m) return null;
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5]));
+}
+
+// 현재 시각이 해당 설문 기간 내인지
+function isWithinPeriod(type) {
+  var p = PERIODS[type];
+  if (!p) return true;
+  var now = new Date();
+  var s = kstToDate(p.start), e = kstToDate(p.end);
+  if (s && now < s) return false;
+  if (e && now > e) return false;
+  return true;
+}
 
 /* ---------- 학생 응답 저장 (POST) ---------- */
 function doPost(e) {
@@ -28,7 +55,11 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     if (data.action !== 'submit') return json({ ok: false, error: 'unknown action' });
 
-    var sheetName = data.sheet || (data.type === 'post' ? '사후설문' : '사전설문');
+    var type = data.type === 'post' ? 'post' : 'pre';
+    // 설문 기간 밖이면 저장 거부(서버측 비활성화)
+    if (!isWithinPeriod(type)) return json({ ok: false, error: '설문 기간이 아닙니다.', closed: true });
+
+    var sheetName = data.sheet || (type === 'post' ? '사후설문' : '사전설문');
     var sid = String(data.sid || '').trim();
     if (!sid) return json({ ok: false, error: '학번(sid) 누락' });
 
