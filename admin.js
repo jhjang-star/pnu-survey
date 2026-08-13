@@ -99,7 +99,6 @@
       '<div class="tabs">' +
         '<button class="tab' + (state.tab === '사전설문' ? ' active' : '') + '" data-tab="사전설문">사전 설문</button>' +
         '<button class="tab' + (state.tab === '사후설문' ? ' active' : '') + '" data-tab="사후설문">사후 설문</button>' +
-        '<button class="tab' + (state.tab === '링크생성' ? ' active' : '') + '" data-tab="링크생성">🔗 학생 링크 생성</button>' +
         '<div style="flex:1"></div>' +
         '<button class="tab" id="reloadBtn">↻ 새로고침</button>' +
       '</div>' +
@@ -122,7 +121,6 @@
 
   function renderTab() {
     var body = el('tabBody');
-    if (state.tab === '링크생성') { renderLinkGen(body); return; }
     var grid = state.data[state.tab] || [];
     if (!grid.length || grid.length < 2) {
       body.innerHTML = '<div class="panel center muted" style="padding:40px">아직 제출된 응답이 없습니다.</div>';
@@ -227,96 +225,15 @@
       '<div class="cnt">' + cnt + '명 · ' + share + '%</div></div>';
   }
 
-  /* ---------------- 학생 링크 생성기 ---------------- */
-  function defaultBase() {
-    try { return location.origin + location.pathname.replace(/admin\.html.*$/, 'index.html'); }
-    catch (e) { return 'index.html'; }
-  }
-
-  function renderLinkGen(body) {
-    var savedBase = localStorage.getItem('pnu_link_base') || defaultBase();
-    body.innerHTML =
-      '<div class="panel">' +
-        '<h3>학생 설문 링크 생성</h3>' +
-        '<div class="qsub">학번 목록을 붙여넣으면 학생별 개인 링크를 만들어 줍니다. 풀리캠퍼스/문자/이메일로 배포하세요.</div>' +
-        '<div class="grid2">' +
-          '<div class="field"><label>설문 페이지 주소 (index.html)</label>' +
-            '<input type="text" id="lgBase" value="' + esc(savedBase) + '" placeholder="https://호스팅주소/index.html"></div>' +
-          '<div class="field"><label>대상 설문</label>' +
-            '<select id="lgType" style="width:100%;padding:12px 14px;border:1.5px solid var(--line-normal);border-radius:var(--radius-12);font-family:var(--font);font-size:14.5px;background:#fff">' +
-              '<option value="pre">사전 설문</option>' +
-              '<option value="post">사후 설문</option>' +
-              '<option value="">설문 선택 화면(사전/사후 고르기)</option>' +
-            '</select></div>' +
-        '</div>' +
-        '<div class="field"><label>학번 목록 (한 줄에 하나 · "학번,이름" 형식도 가능)</label>' +
-          '<textarea id="lgList" placeholder="202512345\n202512346,김철수\n202512347,이영희"></textarea></div>' +
-        '<button class="btn btn-primary" id="lgGen" style="height:44px">링크 생성</button>' +
-        '<div id="lgResult" style="margin-top:18px"></div>' +
-      '</div>';
-
-    el('lgGen').addEventListener('click', function () {
-      var base = el('lgBase').value.trim();
-      localStorage.setItem('pnu_link_base', base);
-      var type = el('lgType').value;
-      var lines = el('lgList').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
-      if (!base) { alert('설문 페이지 주소를 입력하세요.'); return; }
-      if (!lines.length) { alert('학번 목록을 입력하세요.'); return; }
-
-      var items = lines.map(function (line) {
-        var parts = line.split(',');
-        var sidv = (parts[0] || '').trim();
-        var nm = (parts[1] || '').trim();
-        var q = '?sid=' + encodeURIComponent(sidv);
-        if (nm) q += '&name=' + encodeURIComponent(nm);
-        if (type) q += '&type=' + type;
-        return { sid: sidv, name: nm, url: base + q };
-      });
-
-      var rowsHtml = items.map(function (it) {
-        return '<tr><td>' + esc(it.sid) + '</td><td>' + esc(it.name || '-') + '</td>' +
-          '<td style="max-width:420px;overflow:hidden;text-overflow:ellipsis"><a href="' + esc(it.url) + '" target="_blank">' + esc(it.url) + '</a></td>' +
-          '<td><button class="btn btn-line" style="height:30px;padding:0 12px;font-size:12px" data-copy="' + esc(it.url) + '">복사</button></td></tr>';
-      }).join('');
-
-      el('lgResult').innerHTML =
-        '<div class="toolbar"><b>' + items.length + '명</b> 링크 생성됨' +
-          '<div class="spacer"></div>' +
-          '<button class="btn btn-line" id="lgCopyAll" style="height:36px;padding:0 14px;font-size:13px">전체 링크 복사</button>' +
-          '<button class="btn btn-line" id="lgCsv" style="height:36px;padding:0 14px;font-size:13px">CSV 내보내기</button>' +
-        '</div>' +
-        '<div class="table-scroll"><table class="raw"><thead><tr><th>학번</th><th>이름</th><th>링크</th><th></th></tr></thead>' +
-          '<tbody>' + rowsHtml + '</tbody></table></div>';
-
-      Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (b) {
-        b.addEventListener('click', function () { copyText(this.getAttribute('data-copy')); this.textContent = '복사됨'; });
-      });
-      el('lgCopyAll').addEventListener('click', function () {
-        copyText(items.map(function (it) { return it.url; }).join('\n'));
-        this.textContent = '복사됨';
-      });
-      el('lgCsv').addEventListener('click', function () {
-        var header = ['학번', '이름', '링크'];
-        var rows = items.map(function (it) { return [it.sid, it.name, it.url]; });
-        exportCSVData('설문링크', header, rows);
-      });
-    });
-  }
-
-  function copyText(t) {
-    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); return; }
-    var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch (e) {}
-    document.body.removeChild(ta);
-  }
-
   function renderRawTable(header, rows) {
+    var sheetUrl = (window.CONFIG && window.CONFIG.SHEET_URL || '').trim();
     return '<div class="panel">' +
       '<div class="toolbar">' +
-        '<h3 style="margin:0">전체 응답 데이터</h3>' +
+        '<h3 style="margin:0">전체 응답 데이터 (원본)</h3>' +
         '<div class="spacer"></div>' +
         '<input type="text" class="search" id="tblSearch" placeholder="학번/내용 검색">' +
-        '<button class="btn btn-line" id="csvBtn" style="height:38px;padding:0 16px;font-size:13px">CSV 내보내기</button>' +
+        (sheetUrl ? '<a class="btn btn-line" href="' + esc(sheetUrl) + '" target="_blank" rel="noopener" style="height:38px;padding:0 16px;font-size:13px">📄 구글 시트 열기</a>' : '') +
+        '<button class="btn btn-primary" id="csvBtn" style="height:38px;padding:0 16px;font-size:13px">⬇ 원본 데이터(CSV) 다운로드</button>' +
       '</div>' +
       '<div class="table-scroll"><table class="raw" id="rawTable"></table></div>' +
     '</div>';

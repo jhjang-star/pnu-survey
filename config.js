@@ -21,6 +21,10 @@ window.CONFIG = {
   // 예) 'https://script.google.com/macros/s/AKfy.../exec'
   GAS_URL: 'https://script.google.com/macros/s/AKfycbzS3oY1_6IQsYI7lM2yrMRPIWSOEh_bGfJhmJcyhStF-IvPq8k5xIlriQbVN1Me6VOHAw/exec',
 
+  // (선택) 응답이 쌓이는 구글 시트 주소. 넣으면 관리자 화면에 "구글 시트 원본 열기" 버튼이 표시됩니다.
+  // 예) 'https://docs.google.com/spreadsheets/d/....../edit'
+  SHEET_URL: '',
+
   PERIODS: {
     pre:  { start: '', end: '2026-09-07T23:59' },                   // 사전: (테스트) 지금부터 ~ 9/7
     post: { start: '2026-12-01T09:00', end: '2026-12-07T23:59' },   // 사후: 12월 첫째주(1~7일)
