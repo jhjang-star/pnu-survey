@@ -108,8 +108,8 @@
 
   /* ---------------- 문항 렌더링 ---------------- */
   function scaleHTML(qq) {
-    var labels = qq.scaleLabels || window.SCALE_DEFAULT;
-    var pts = window.SCALE_POINTS;
+    var pts = qq.scalePoints || window.SCALE_POINTS;
+    var labels = qq.scaleLabels || (qq.scalePoints ? [qq.scalePoints[0], qq.scalePoints[4]] : window.SCALE_DEFAULT);
     var opts = '';
     for (var v = 1; v <= 5; v++) {
       opts +=

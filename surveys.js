@@ -47,7 +47,7 @@ window.SURVEYS = {
         options: ['없음', '브릿지기초수학', '기초수학', '수학1(공학미적분학1)', '수학2(공학미적분학2)', '공학미적분학', '(공학)선형대수학', '공업수학'] },
       { id: 'q9', type: 'scale', required: true,
         label: '현재 자신의 수학 실력은 어느 정도라고 생각합니까?',
-        scaleLabels: ['매우 부족', '매우 우수'] },
+        scalePoints: ['매우 부족', '부족', '보통', '우수', '매우 우수'] },
 
       { type: 'section', label: '수학 학습 태도' },
       { id: 'q10', type: 'scale', required: true, label: '수학에 흥미가 있다.' },
@@ -56,8 +56,7 @@ window.SURVEYS = {
 
       { type: 'section', label: 'AI 기반 학습 기대' },
       { id: 'q13', type: 'scale', required: true,
-        label: '수학 학습에서 AI 기반 학습 시스템을 사용해 본 경험이 있다.',
-        scaleLabels: ['전혀 없다', '매우 많다'] },
+        label: '수학 학습에서 AI 기반 학습 시스템을 사용해 본 경험이 있다.' },
       { id: 'q14', type: 'scale', required: true, label: 'AI 기반 학습 시스템이 학습에 도움이 될 것이라고 생각한다.' },
       { id: 'q15', type: 'scale', required: true, label: 'AI가 제공하는 맞춤형 피드백은 학습 효과를 높일 것이라고 생각한다.' },
       { id: 'q16', type: 'scale', required: true, label: '이번 수업에서 AI 기반 학습 활동에 적극 참여할 의향이 있다.' },
