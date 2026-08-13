@@ -20,6 +20,35 @@
   }
   function el(id) { return document.getElementById(id); }
 
+  /* ---------------- 설문 기간 ---------------- */
+  function getPeriod(t) {
+    var p = (window.CONFIG && window.CONFIG.PERIODS && window.CONFIG.PERIODS[t]) || {};
+    return {
+      start: p.start ? new Date(p.start) : null,
+      end: p.end ? new Date(p.end) : null,
+    };
+  }
+  function getStatus(t) {
+    var pr = getPeriod(t);
+    var now = new Date();
+    if (pr.start && now < pr.start) return 'before';
+    if (pr.end && now > pr.end) return 'closed';
+    return 'open';
+  }
+  function fmtDate(d) {
+    if (!d || isNaN(d.getTime())) return '';
+    var p = function (n) { return ('0' + n).slice(-2); };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function periodText(t) {
+    var pr = getPeriod(t);
+    if (pr.start && pr.end) return fmtDate(pr.start) + ' ~ ' + fmtDate(pr.end);
+    if (pr.end) return fmtDate(pr.end) + ' 까지';
+    if (pr.start) return fmtDate(pr.start) + ' 부터';
+    return '';
+  }
+  var STATUS_LABEL = { open: '진행중', before: '시작 전', closed: '마감' };
+
   function renderWho() {
     if (sid) {
       whoBox.innerHTML = '학번 <b>' + esc(sid) + '</b>' + (name ? ' · ' + esc(name) : '');
@@ -29,8 +58,19 @@
   }
 
   /* ---------------- 설문 선택 화면 ---------------- */
-  function renderPicker() {
+  function pickCard(type, icon, icClass, title, desc) {
     var q = sid ? ('?sid=' + encodeURIComponent(sid) + (name ? '&name=' + encodeURIComponent(name) : '')) : '';
+    var st = getStatus(type);
+    var pt = periodText(type);
+    return '<a class="pick-card" href="index.html' + (q ? q + '&' : '?') + 'type=' + type + '">' +
+        '<div class="ic-row"><div class="ic ' + icClass + '">' + icon + '</div>' +
+          '<span class="pick-badge ' + st + '">' + STATUS_LABEL[st] + '</span></div>' +
+        '<h3>' + title + '</h3>' +
+        '<p>' + desc + '</p>' +
+        (pt ? '<div class="period-line">📅 ' + esc(pt) + '</div>' : '') +
+      '</a>';
+  }
+  function renderPicker() {
     app.innerHTML =
       '<div class="hero">' +
         '<span class="tag">부산대학교 · AI 기반 수학 학습 지원 시스템</span>' +
@@ -40,16 +80,29 @@
       (sid ? '' :
         '<div class="banner warn">⚠️ 학번 정보가 확인되지 않았습니다. 풀리캠퍼스에서 접속하면 학번이 자동 연동됩니다. 테스트 시에는 설문 화면에서 학번을 입력할 수 있습니다.</div>') +
       '<div class="pick-grid">' +
-        '<a class="pick-card" href="index.html' + (q ? q + '&' : '?') + 'type=pre">' +
-          '<div class="ic pre">📝</div>' +
-          '<h3>사전 설문조사</h3>' +
-          '<p>수업 시작 전, 수학 학습 배경과 기대를 확인합니다.<br>16문항 · 약 5분</p>' +
-        '</a>' +
-        '<a class="pick-card" href="index.html' + (q ? q + '&' : '?') + 'type=post">' +
-          '<div class="ic post">✅</div>' +
-          '<h3>사후 설문조사</h3>' +
-          '<p>수업 이후, AI 기반 학습 경험을 평가합니다.<br>20문항 · 약 5~7분</p>' +
-        '</a>' +
+        pickCard('pre', '📝', 'pre', '사전 설문조사', '수업 시작 전, 수학 학습 배경과 기대를 확인합니다.<br>16문항 · 약 5분') +
+        pickCard('post', '✅', 'post', '사후 설문조사', '수업 이후, AI 기반 학습 경험을 평가합니다.<br>20문항 · 약 5~7분') +
+      '</div>';
+  }
+
+  /* ---------------- 기간 잠금 화면 ---------------- */
+  function renderNotice(survey, status) {
+    var pt = periodText(survey.key);
+    var icon = status === 'before' ? '⏳' : '🔒';
+    var head = status === 'before' ? '아직 설문 시작 전이에요' : '설문이 마감되었습니다';
+    var sub = status === 'before'
+      ? '설문 기간이 시작되면 다시 접속해 주세요.'
+      : '설문 응답 기간이 종료되었습니다. 참여해 주셔서 감사합니다.';
+    app.innerHTML =
+      '<div class="done">' +
+        '<div class="check" style="background:var(--fill-warning-weak);color:var(--fill-warning)">' + icon + '</div>' +
+        '<h2>' + head + '</h2>' +
+        '<p>' + sub + '</p>' +
+        '<p class="muted">' + esc(survey.title) + '</p>' +
+        (pt ? '<p class="muted">설문 기간 · ' + esc(pt) + '</p>' : '') +
+        '<div style="margin-top:24px">' +
+          '<a class="btn btn-line" href="index.html' + (sid ? '?sid=' + encodeURIComponent(sid) : '') + '">← 설문 선택으로</a>' +
+        '</div>' +
       '</div>';
   }
 
@@ -108,6 +161,9 @@
   }
 
   function renderSurvey(survey) {
+    var status = getStatus(survey.key);
+    if (status !== 'open') { renderNotice(survey, status); return; }
+
     var sectionCount = 0;
     var qNo = 0;
     var body = '';
@@ -144,6 +200,7 @@
         '<span class="tag">부산대학교 · AI 기반 수학 학습 지원 시스템</span>' +
         '<h1>' + esc(survey.title) + '</h1>' +
         '<p>' + esc(survey.subtitle) + '</p>' +
+        (periodText(survey.key) ? '<div class="period">📅 설문 기간 · ' + esc(periodText(survey.key)) + '</div>' : '') +
       '</div>' +
       (sid ? '' :
         '<div class="banner warn">⚠️ 학번이 연동되지 않았습니다. 아래에 학번을 입력해 주세요. (풀리캠퍼스에서 접속하면 자동 연동됩니다)' +
@@ -254,6 +311,10 @@
 
   /* ---------------- 제출 ---------------- */
   function onSubmit(survey) {
+    // 기간 재확인 (작성 중 마감된 경우 차단)
+    var status = getStatus(survey.key);
+    if (status !== 'open') { renderNotice(survey, status); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+
     // 학번 확인
     if (!sid) {
       var si = el('sidInput');
