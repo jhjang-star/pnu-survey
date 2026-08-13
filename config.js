@@ -19,10 +19,10 @@
 
 window.CONFIG = {
   // 예) 'https://script.google.com/macros/s/AKfy.../exec'
-  GAS_URL: '',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbzS3oY1_6IQsYI7lM2yrMRPIWSOEh_bGfJhmJcyhStF-IvPq8k5xIlriQbVN1Me6VOHAw/exec',
 
   PERIODS: {
-    pre:  { start: '', end: '' },   // 사전 설문 기간
-    post: { start: '', end: '' },   // 사후 설문 기간
+    pre:  { start: '2026-09-01T09:00', end: '2026-09-07T23:59' },   // 사전: 9월 첫째주(1~7일)
+    post: { start: '2026-12-01T09:00', end: '2026-12-07T23:59' },   // 사후: 12월 첫째주(1~7일)
   },
 };
