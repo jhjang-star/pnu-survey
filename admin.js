@@ -18,43 +18,40 @@
 
   /* ---------------- 로그인 화면 ---------------- */
   function renderLogin(errMsg) {
-    var savedUrl = (window.CONFIG && window.CONFIG.GAS_URL) || localStorage.getItem('pnu_admin_url') || '';
     app.innerHTML =
       '<div class="login">' +
         '<h2>관리자 로그인</h2>' +
-        '<p>설문 응답 집계를 확인하려면 로그인하세요.</p>' +
+        '<p>비밀번호를 입력하면 설문 응답 집계를 확인할 수 있습니다.</p>' +
         (errMsg ? '<div class="banner err">' + esc(errMsg) + '</div>' : '') +
-        '<div class="field"><label>Apps Script 웹앱 URL</label>' +
-          '<input type="text" id="inUrl" placeholder="https://script.google.com/macros/s/.../exec" value="' + esc(savedUrl) + '"></div>' +
         '<div class="field"><label>관리자 비밀번호</label>' +
-          '<input type="text" id="inPw" placeholder="비밀번호" autocomplete="off"></div>' +
+          '<input type="password" id="inPw" placeholder="비밀번호" autocomplete="current-password"></div>' +
         '<button class="btn btn-primary btn-block" id="loginBtn">로그인</button>' +
-        '<p style="margin-top:16px;font-size:12px" class="muted">URL 미입력 시 이 브라우저의 데모 저장분(localStorage)을 표시합니다.</p>' +
       '</div>';
     el('loginBtn').addEventListener('click', doLogin);
     el('inPw').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+    el('inPw').focus();
   }
 
   function doLogin() {
-    state.url = el('inUrl').value.trim();
+    // URL은 config.js 고정값 사용 (미설정 시 데모 모드)
+    state.url = (window.CONFIG && window.CONFIG.GAS_URL || '').trim();
     state.pw = el('inPw').value.trim();
     var btn = el('loginBtn'); btn.disabled = true; btn.textContent = '확인 중…';
 
     if (!state.url) {
-      // 데모 모드
+      // 데모 모드 (GAS_URL 미설정 시)
       state.data = loadDemo();
       whoBox.textContent = '데모 모드';
       renderDash();
       return;
     }
-    localStorage.setItem('pnu_admin_url', state.url);
     jsonp(state.url, { action: 'data', pw: state.pw }, function (res) {
-      if (!res || !res.ok) { renderLogin((res && res.error) || '조회 실패 (URL/네트워크 확인)'); return; }
+      if (!res || !res.ok) { renderLogin((res && res.error) || '비밀번호가 올바르지 않습니다.'); return; }
       state.data = res.sheets;
       whoBox.textContent = '관리자';
       renderDash();
     }, function () {
-      renderLogin('서버 연결에 실패했습니다. 웹앱 URL과 배포(액세스: 모든 사용자)를 확인하세요.');
+      renderLogin('서버 연결에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     });
   }
 
