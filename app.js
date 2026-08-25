@@ -181,9 +181,11 @@
       return;
     }
     var html = '';
-    list.forEach(function (s, i) {
+    list.forEach(function (item, i) {
+      var num = Array.isArray(item) ? item[0] : item;
+      var prof = Array.isArray(item) ? item[1] : '';
       var id = qq.id + '_' + i;
-      var val = s + '분반';
+      var val = num + '분반' + (prof ? ' (' + prof + ' 교수님)' : '');
       html +=
         '<div class="choice radio">' +
           '<input type="radio" id="' + id + '" name="' + qq.id + '" value="' + esc(val) + '">' +
