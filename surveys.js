@@ -22,9 +22,11 @@ window.SURVEYS = {
       { id: 'q1', type: 'radio', required: true,
         label: '현재 수강 중인 학기는 언제입니까?',
         options: ['2026년 여름계절학기', '2026년 2학기'] },
-      { id: 'q2', type: 'radio', required: true, other: true,
+      { id: 'q2', type: 'radio', required: true,
         label: '현재 수강 중인 과목은 무엇입니까?',
-        options: ['수학1', '수학2', '공학미적분학1', '공학미적분학2', '공학미적분학', '공업수학', '(공학)선형대수학'] },
+        options: ['공학미적분학(II)', '공학선형대수학', '수학(II)', '공업수학(I)', '공업수학(II)', '기초수학', '이산수학', '과학수학', '응용복소해석학(II)', '생활과학적수학모델링'] },
+      { id: 'q2b', type: 'dependent', required: true, dependsOn: 'q2', optionsBy: 'COURSE_SECTIONS',
+        label: '수강 중인 분반을 선택해 주세요.' },
       { id: 'q3', type: 'radio', required: true,
         label: '성별',
         options: ['남성', '여성', '응답하지 않음'] },
@@ -110,6 +112,20 @@ window.SURVEYS = {
         placeholder: '자유롭게 작성해 주세요. (선택)' },
     ],
   },
+};
+
+/* 교과목별 실제 운영 분반 (2026, 부산대 제공 기준) — q2b(분반) 문항에서 사용 */
+window.COURSE_SECTIONS = {
+  '공학미적분학(II)': [1, 23, 66, 71],
+  '공학선형대수학': [1, 2, 3, 10, 62, 63, 64, 65],
+  '수학(II)': [3, 4],
+  '공업수학(I)': [1],
+  '공업수학(II)': [2],
+  '기초수학': [30],
+  '이산수학': [66, 83],
+  '과학수학': [87],
+  '응용복소해석학(II)': [83],
+  '생활과학적수학모델링': [1],
 };
 
 /* 리커트 5점 기본 라벨 (좌 1점 ~ 우 5점) */

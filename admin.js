@@ -183,6 +183,18 @@
       return head + '<div class="qsub">응답 ' + answered.length + '명</div>' + b;
     }
 
+    if (q.type === 'dependent') {
+      var dc = {};
+      answered.forEach(function (v) { dc[v] = (dc[v] || 0) + 1; });
+      var dkeys = Object.keys(dc).sort(function (a, b) {
+        var na = parseInt(a, 10), nb = parseInt(b, 10);
+        return (isNaN(na) || isNaN(nb)) ? a.localeCompare(b) : na - nb;
+      });
+      var dmax = Math.max.apply(null, dkeys.map(function (k) { return dc[k]; }).concat([1]));
+      var db = dkeys.map(function (k) { return barRow(k, dc[k], answered.length, dmax); }).join('');
+      return head + '<div class="qsub">응답 ' + answered.length + '명</div>' + (db || '<div class="qsub">응답 없음</div>');
+    }
+
     if (q.type === 'checkbox') {
       var cc = {}; (q.options || []).forEach(function (o) { cc[o] = 0; });
       var oth = 0, respCount = 0;

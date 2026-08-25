@@ -160,6 +160,48 @@
     return '<input type="text" data-q="' + qq.id + '" placeholder="' + esc(qq.placeholder || '') + '">';
   }
 
+  // 종속 문항(예: 분반) — 상위 문항(과목) 선택에 따라 보기가 채워짐
+  function dependentHTML(qq) {
+    return '<div class="choices" data-q="' + qq.id + '">' +
+      '<div class="dep-hint muted" style="font-size:13px;padding:2px 0">↑ 먼저 위에서 과목을 선택하면 분반이 표시됩니다.</div>' +
+      '</div>';
+  }
+
+  function renderDependentOptions(qq, parentValue) {
+    var container = document.querySelector('.choices[data-q="' + qq.id + '"]');
+    if (!container) return;
+    var map = window[qq.optionsBy] || {};
+    var list = parentValue ? map[parentValue] : null;
+    if (!parentValue) {
+      container.innerHTML = '<div class="dep-hint muted" style="font-size:13px;padding:2px 0">↑ 먼저 위에서 과목을 선택하면 분반이 표시됩니다.</div>';
+      return;
+    }
+    if (!list || !list.length) {
+      container.innerHTML = '<div class="dep-hint muted" style="font-size:13px;padding:2px 0">선택한 과목의 분반 정보가 없습니다.</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (s, i) {
+      var id = qq.id + '_' + i;
+      var val = s + '분반';
+      html +=
+        '<div class="choice radio">' +
+          '<input type="radio" id="' + id + '" name="' + qq.id + '" value="' + esc(val) + '">' +
+          '<label for="' + id + '"><span class="box">' + CHECK_SVG + '</span><span>' + esc(val) + '</span></label>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function handleDependents(target, survey) {
+    if (!target || !target.name) return;
+    survey.questions.forEach(function (q) {
+      if (q.type === 'dependent' && q.dependsOn === target.name) {
+        renderDependentOptions(q, getValue(findQ(survey, q.dependsOn)));
+      }
+    });
+  }
+
   function renderSurvey(survey) {
     var status = getStatus(survey.key);
     if (status !== 'open') { renderNotice(survey, status); return; }
@@ -183,6 +225,7 @@
       if (item.type === 'scale') control = scaleHTML(item);
       else if (item.type === 'radio') control = choiceHTML(item, false);
       else if (item.type === 'checkbox') control = choiceHTML(item, true);
+      else if (item.type === 'dependent') control = dependentHTML(item);
       else control = textHTML(item);
 
       body +=
@@ -231,6 +274,7 @@
 
     app.addEventListener('change', function (e) {
       handleOtherToggle(e.target, survey);
+      handleDependents(e.target, survey);
       updateProgress(survey, totalRequired);
     });
     app.addEventListener('input', function (e) {
@@ -258,7 +302,7 @@
 
   /* ---------------- 값 추출 ---------------- */
   function getValue(qq) {
-    if (qq.type === 'scale' || qq.type === 'radio') {
+    if (qq.type === 'scale' || qq.type === 'radio' || qq.type === 'dependent') {
       var sel = document.querySelector('input[name="' + qq.id + '"]:checked');
       if (!sel) return '';
       if (qq.other && sel.hasAttribute('data-other')) {
