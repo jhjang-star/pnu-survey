@@ -71,6 +71,13 @@ window.SURVEYS = {
     subtitle: '수업 이후, AI 기반 학습 경험에 대한 여러분의 의견을 듣기 위한 설문입니다. (약 5~7분)',
     sheet: '사후설문',
     questions: [
+      { type: 'section', label: '기본 정보' },
+      { id: 'c1', type: 'radio', required: true,
+        label: '현재 수강 중인 과목은 무엇입니까?',
+        options: ['공학미적분학(II)', '공학선형대수학', '수학(II)', '공업수학(I)', '공업수학(II)', '기초수학', '이산수학', '과학수학', '응용복소해석학(II)', '생활과학적수학모델링'] },
+      { id: 'c2', type: 'dependent', required: true, dependsOn: 'c1', optionsBy: 'COURSE_SECTIONS',
+        label: '수강 중인 분반을 선택해 주세요.' },
+
       { type: 'section', label: '수학 학습 태도' },
       { id: 'q1', type: 'scale', required: true, label: '수학 학습에 대한 흥미가 있다.' },
       { id: 'q2', type: 'scale', required: true, label: '나는 수학 문제를 스스로 해결하려고 노력한다.' },
